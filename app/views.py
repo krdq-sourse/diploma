@@ -46,18 +46,49 @@ class LoginAPIView(APIView):
 
 class ApplicationListView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request):
-        print(request.user)
+        print(request.user.id)
         app = ApplicationModel.objects.all()
+        serializer = ApplicationListSerializer(app, many=True)
+        return Response(serializer.data)
+
+
+class ApplicationView(APIView):
+    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, pk):
+        print(request.user.id)
+        app = ApplicationModel.objects.get(pk=pk)
+        serializer = ApplicationSerializer(app,)
+        return Response(serializer.data)
+
+
+class UsersApplicationListView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        app = ApplicationModel.objects.filter(author=request.user.id)
         serializer = ApplicationListSerializer(app, many=True)
         return Response(serializer.data)
 
 
 class AddApplicationView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    def post(self,request):
+
+    def post(self, request):
         serializer = AddApplicationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(request.user_id, status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# class AddUserView(APIView):
+#
+#     def post(self, request):
+#         serializer = RegistrationSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

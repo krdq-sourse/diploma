@@ -78,6 +78,16 @@ class LoginSerializer(serializers.Serializer):
 
 class ApplicationListSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(slug_field="username", read_only=True, many=False)
+    responsible_staff = serializers.SlugRelatedField(slug_field="username", read_only=True, )
+
+    class Meta:
+        model = ApplicationModel
+        fields = "__all__"
+
+
+class ApplicationSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(slug_field="username", read_only=True, )
+    responsible_staff = serializers.SlugRelatedField(slug_field="username", read_only=True, )
 
     class Meta:
         model = ApplicationModel
@@ -88,3 +98,9 @@ class AddApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = ApplicationModel
         fields = "__all__"
+
+
+class GetUserDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["username", "is_staff"]

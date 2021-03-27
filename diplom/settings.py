@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'app',
     'corsheaders',
+    'chat',
+    'channels',
+
 ]
 AUTH_USER_MODEL = 'app.User'
 

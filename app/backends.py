@@ -83,7 +83,6 @@ class JWTAuthentication(authentication.BaseAuthentication):
             raise exceptions.AuthenticationFailed(msg)
 
         try:
-            print(payload)
             user = User.objects.get(pk=payload['user_id'])
         except User.DoesNotExist:
             msg = 'Нет совпадений по пользователю.'

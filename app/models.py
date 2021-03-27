@@ -83,7 +83,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         этого пользователя и срок его действия
         составляет 60 дней в будущем.
         """
-        dt = datetime.now() + timedelta(days=60)
+        dt = datetime.now() + timedelta(6000)
 
         token = jwt.encode({
             'id': self.pk,
@@ -95,9 +95,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class ApplicationModel(models.Model):
     title = models.CharField(max_length=120, verbose_name="Заголовок")
-    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Автор заявки")
+    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Автор заявки",  related_name='author')
     text = models.TextField(verbose_name="Содержание")
-    date_of_submission = models.DateTimeField(verbose_name="Время отправки")
+    date_of_submission = models.DateField(verbose_name="Время отправки", default="2020-10-18" )
     priority_types = (
         (1, "Неопределен"),
         (2, "Низкий"),
@@ -115,6 +115,7 @@ class ApplicationModel(models.Model):
     )
     status = models.IntegerField(choices=status_types, verbose_name="Статус заявки")
 
+    responsible_staff = models.ForeignKey(User, default=1, on_delete=models.CASCADE, related_name='staff' ,verbose_name="Отвественный")
     class Meta:
         verbose_name = "Заявка"
         verbose_name_plural = "Заявки"
