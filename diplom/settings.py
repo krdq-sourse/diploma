@@ -42,8 +42,10 @@ INSTALLED_APPS = [
     'corsheaders',
     'chat',
     'channels',
-
+    'djoser',
 ]
+
+ASGI_APPLICATION = "diplom.routing.application"
 AUTH_USER_MODEL = 'app.User'
 
 MIDDLEWARE = [
@@ -165,3 +167,11 @@ from datetime import timedelta
 ALLOWED_HOSTS = ['*']
 
 CORS_ORIGIN_ALLOW_ALL = True
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6667)],
+        },
+    },
+}
