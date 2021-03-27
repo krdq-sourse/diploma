@@ -52,8 +52,10 @@ class Dialog(APIView):
 class AddUsersRoom(APIView):
     """Добавление юзеров в комнату чата"""
     def get(self, request):
+        print("addUserRoom view (GET method) beginning")
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
+        print("addUserRoom view (GET method) ending")
         return Response(serializer.data)
 
     def post(self, request):
