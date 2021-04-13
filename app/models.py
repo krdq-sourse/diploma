@@ -95,9 +95,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class ApplicationModel(models.Model):
     title = models.CharField(max_length=120, verbose_name="Заголовок")
-    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Автор заявки",  related_name='author')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Автор заявки", related_name='author')
     text = models.TextField(verbose_name="Содержание")
-    date_of_submission = models.DateField(verbose_name="Время отправки", default="2020-10-18" )
+    date_of_submission = models.DateField(verbose_name="Время отправки", default="2020-10-18")
     priority_types = (
         (1, "Неопределен"),
         (2, "Низкий"),
@@ -115,7 +115,33 @@ class ApplicationModel(models.Model):
     )
     status = models.IntegerField(choices=status_types, verbose_name="Статус заявки")
 
-    responsible_staff = models.ForeignKey(User, default=1, on_delete=models.CASCADE, related_name='staff' ,verbose_name="Отвественный")
+    responsible_staff = models.ForeignKey(User, default=1, on_delete=models.CASCADE, related_name='staff',
+                                          verbose_name="Отвественный")
+
     class Meta:
         verbose_name = "Заявка"
         verbose_name_plural = "Заявки"
+
+
+class Room(models.Model):
+    """Модель комнаты чата"""
+    # creator = models.ForeignKey(User, verbose_name="Создатель", on_delete=models.CASCADE)
+    # invited = models.ManyToManyField(User, verbose_name="Участники", related_name="invited_user")
+    app = models.ForeignKey(ApplicationModel, verbose_name="Заявка", on_delete=models.CASCADE)
+    date = models.DateTimeField("Дата создания", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Комната чата"
+        verbose_name_plural = "Комнаты чатов"
+
+
+class Chat(models.Model):
+    """Модель чата"""
+    room = models.ForeignKey(Room, verbose_name="Комната чата", on_delete=models.CASCADE)
+    user = models.ForeignKey(User, verbose_name="Пользователь", on_delete=models.CASCADE)
+    text = models.TextField("Сообщение", max_length=500)
+    date = models.DateTimeField("Дата отправки", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Сообщение чата"
+        verbose_name_plural = "Сообщения чатов"

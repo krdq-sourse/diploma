@@ -1,15 +1,17 @@
+# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2020 the sqlparse authors and contributors
+# Copyright (C) 2009-2018 the sqlparse authors and contributors
 # <see AUTHORS file>
 #
 # This module is part of python-sqlparse and is released under
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
 from sqlparse import sql, tokens as T
+from sqlparse.compat import text_type
 from sqlparse.utils import offset, indent
 
 
-class ReindentFilter:
+class ReindentFilter(object):
     def __init__(self, width=2, char=' ', wrap_after=0, n='\n',
                  comma_first=False, indent_after_first=False,
                  indent_columns=False):
@@ -40,7 +42,7 @@ class ReindentFilter:
         return self.offset + self.indent * self.width
 
     def _get_offset(self, token):
-        raw = ''.join(map(str, self._flatten_up_to_token(token)))
+        raw = u''.join(map(text_type, self._flatten_up_to_token(token)))
         line = (raw or '\n').splitlines()[-1]
         # Now take current offset into account and return relative offset.
         return len(line) - len(self.char * self.leading_ws)
@@ -69,7 +71,7 @@ class ReindentFilter:
         tidx, token = self._next_token(tlist)
         while token:
             pidx, prev_ = tlist.token_prev(tidx, skip_ws=False)
-            uprev = str(prev_)
+            uprev = text_type(prev_)
 
             if prev_ and prev_.is_whitespace:
                 del tlist.tokens[pidx]
@@ -102,10 +104,9 @@ class ReindentFilter:
 
     def _process_where(self, tlist):
         tidx, token = tlist.token_next_by(m=(T.Keyword, 'WHERE'))
-        if not token:
-            return
         # issue121, errors in statement fixed??
         tlist.insert_before(tidx, self.nl())
+
         with indent(self):
             self._process_default(tlist)
 
@@ -113,8 +114,6 @@ class ReindentFilter:
         ttypes = T.Keyword.DML, T.Keyword.DDL
         _, is_dml_dll = tlist.token_next_by(t=ttypes)
         fidx, first = tlist.token_next_by(m=sql.Parenthesis.M_OPEN)
-        if first is None:
-            return
 
         with indent(self, 1 if is_dml_dll else 0):
             tlist.tokens.insert(0, self.nl()) if is_dml_dll else None
@@ -235,7 +234,7 @@ class ReindentFilter:
         self._process(stmt)
 
         if self._last_stmt is not None:
-            nl = '\n' if str(self._last_stmt).endswith('\n') else '\n\n'
+            nl = '\n' if text_type(self._last_stmt).endswith('\n') else '\n\n'
             stmt.tokens.insert(0, sql.Token(T.Whitespace, nl))
 
         self._last_stmt = stmt

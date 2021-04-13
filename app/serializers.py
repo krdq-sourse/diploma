@@ -104,3 +104,54 @@ class GetUserDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["username", "is_staff"]
+
+
+# chat
+class UserSerializer(serializers.ModelSerializer):
+    """Сериализация пользователя"""
+    class Meta:
+        model = User
+        fields = ("id", "username")
+
+
+class StaffChatSerializer(serializers.ModelSerializer):
+    """Сериализация operatora"""
+
+    class Meta:
+        model = ApplicationModel
+        fields = ("responsible_staff", )
+
+
+class AuthorChatSerializer(serializers.ModelSerializer):
+    """Сериализация пользователя"""
+
+    class Meta:
+        model = ApplicationModel
+        fields = ("author", )
+
+
+class RoomSerializers(serializers.ModelSerializer):
+    """Сериализация комнат чата"""
+    author = AuthorChatSerializer()
+    responsible_staff = StaffChatSerializer()
+
+    class Meta:
+        model = Room
+        fields = ("id", "author", "responsible_staff")
+
+
+class ChatSerializers(serializers.ModelSerializer):
+    """Сериализация чата"""
+    user = UserSerializer()
+
+    class Meta:
+        model = Chat
+        fields = ("user", "text", "date")
+
+
+class ChatPostSerializers(serializers.ModelSerializer):
+    """Сериализация чата"""
+
+    class Meta:
+        model = Chat
+        fields = ("room", "text")
