@@ -49,9 +49,15 @@ class ApplicationListView(APIView):
 
     def get(self, request):
         print(request.user.id)
-        app = ApplicationModel.objects.all()
-        serializer = ApplicationListSerializer(app, many=True)
-        return Response(serializer.data)
+        user = User.objects.get(pk=request.user.id)
+        if user.is_staff:
+            app = ApplicationModel.objects.all()
+            serializer = ApplicationListSerializer(app, many=True)
+            return Response(serializer.data)
+        else:
+            app = ApplicationModel.objects.filter(author=request.user.id)
+            serializer = ApplicationListSerializer(app, many=True)
+            return Response(serializer.data)
 
 
 class ApplicationView(APIView):
@@ -80,7 +86,7 @@ class AddApplicationView(APIView):
     def post(self, request):
         serializer = AddApplicationSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(author=request.user)
             return Response(status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -94,57 +100,60 @@ class AddApplicationView(APIView):
 #             return Response(status=status.HTTP_201_CREATED)
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class Rooms(APIView):
-    """Комнаты чата"""
+
+class GetChatMessages(APIView):
+    """Получить все сообщения из чата"""
+
+    def get(self, request, pk):
+        massages = Chat.objects.filter(app=pk)
+        serializer = ChatGetSerializer(massages, many=True)
+        return Response({"data": serializer.data})
+
+
+class GetMyName(APIView):
+
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response({"data": serializer.data})
+
+
+class SendMessageView(APIView):
+    """Диалог чата, сообщение"""
     permission_classes = [permissions.IsAuthenticated, ]
 
-    def get(self, request):
-        rooms = Room.objects.filter(Q(creator=request.user) | Q(invited=request.user))
-        serializer = RoomSerializers(rooms, many=True)
-        return Response({"data": serializer.data})
+    # permission_classes = [permissions.AllowAny, ]
 
-    def post(self, request):
-        Room.objects.create(creator=request.user)
-        return Response(status=201)
-
-
-class Dialog(APIView):
-    """Диалог чата, сообщение"""
-    # permission_classes = [permissions.IsAuthenticated, ]
-
-    permission_classes = [permissions.AllowAny, ]
-
-    def get(self, request):
-        room = request.GET.get("room")
-        chat = Chat.objects.filter(room=room)
-        serializer = ChatSerializers(chat, many=True)
-        return Response({"data": serializer.data})
+    # def get(self, request):
+    #     room = request.GET.get("room")
+    #     chat = Chat.objects.filter(room=room)
+    #     serializer = ChatSerializers(chat, many=True)
+    #     return Response({"data": serializer.data})
 
     def post(self, request):
         # room = request.data.get("room")
         dialog = ChatPostSerializers(data=request.data)
+        print(request.user)
         if dialog.is_valid():
             dialog.save(user=request.user)
             return Response(status=201)
         else:
             return Response(status=400)
 
-
-class AddUsersRoom(APIView):
-    """Добавление юзеров в комнату чата"""
-
-    def get(self, request):
-        users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
-
-    def post(self, request):
-        room = request.data.get("room")
-        user = request.data.get("user")
-        try:
-            room = Room.objects.get(id=room)
-            room.invited.add(user)
-            room.save()
-            return Response(status=201)
-        except:
-            return Response(status=400)
+# class AddUsersRoom(APIView):
+#     """Добавление юзеров в комнату чата"""
+#
+# def get(self, request):
+#     users = User.objects.all()
+#     serializer = UserSerializer(users, many=True)
+#     return Response(serializer.data)
+#
+# def post(self, request):
+#     room = request.data.get("room")
+#     user = request.data.get("user")
+#     try:
+#         room = Room.objects.get(id=room)
+#         room.invited.add(user)
+#         room.save()
+#         return Response(status=201)
+#     except:
+#         return Response(status=400)

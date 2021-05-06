@@ -121,37 +121,65 @@ class StaffChatSerializer(serializers.ModelSerializer):
         model = ApplicationModel
         fields = ("responsible_staff", )
 
-
-class AuthorChatSerializer(serializers.ModelSerializer):
-    """Сериализация пользователя"""
-
-    class Meta:
-        model = ApplicationModel
-        fields = ("author", )
-
-
-class RoomSerializers(serializers.ModelSerializer):
-    """Сериализация комнат чата"""
-    author = AuthorChatSerializer()
-    responsible_staff = StaffChatSerializer()
-
-    class Meta:
-        model = Room
-        fields = ("id", "author", "responsible_staff")
+#
+# class AuthorChatSerializer(serializers.ModelSerializer):
+#     """Сериализация пользователя"""
+#
+#     class Meta:
+#         model = ApplicationModel
+#         fields = ("author", )
+#
+#
+# class AppChatSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = ApplicationModel
+#         fields = ("id", )
 
 
-class ChatSerializers(serializers.ModelSerializer):
-    """Сериализация чата"""
-    user = UserSerializer()
+# class RoomSerializers(serializers.ModelSerializer):
+#     """Сериализация комнат чата"""
+#
+#     # author = AuthorChatSerializer()
+#     # responsible_staff = StaffChatSerializer()
+#     app = AppChatSerializer()
+#
+#     class Meta:
+#         model = Room
+#         fields = ("app",)
+#
+# class AddRoomSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = Room
+#         fields = "__all__"
 
-    class Meta:
-        model = Chat
-        fields = ("user", "text", "date")
+
+# class ChatSerializers(serializers.ModelSerializer):
+#     """Сериализация чата"""
+#     user = UserSerializer()
+#
+#     class Meta:
+#         model = Chat
+#         fields = ("user", "text", "date")
 
 
+# class RoomChatSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Room
+#         fields = ("app", )
+
+#
 class ChatPostSerializers(serializers.ModelSerializer):
     """Сериализация чата"""
 
     class Meta:
         model = Chat
-        fields = ("room", "text")
+        fields = ("app", "text")
+
+
+class ChatGetSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(slug_field="username", read_only=True, )
+
+    class Meta:
+        model = Chat
+        fields = "__all__"
